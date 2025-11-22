@@ -2,6 +2,7 @@ import java.time.Duration;
 import java.util.List;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -13,13 +14,28 @@ public class YatraAutomationScript {
 
 	public static void main(String[] args) throws InterruptedException
 	{
+		
 		ChromeOptions chromeoption = new ChromeOptions();
 		chromeoption.addArguments("--disable-notifications");
 		WebDriver wd = new ChromeDriver(chromeoption);
+		WebDriverWait wait = new WebDriverWait(wd,Duration.ofSeconds(20));
 		
 		wd.manage().window().maximize();
 		
 		wd.get("https://yatra.com");
+		
+		By popUpLocator = By.xpath("//div[contains(@class,\"style_popup\")][1]");
+		
+		try
+		{
+			WebElement popUpElement =wait.until(ExpectedConditions.visibilityOfElementLocated(popUpLocator));
+			WebElement crossbutton=popUpElement.findElement(By.xpath(".//img[@alt=\"cross\"]"));
+	        crossbutton.click();	
+		}
+		catch(TimeoutException e)
+		{
+			System.out.println("POp up not found");
+		}
 		
 	
 		
@@ -27,8 +43,7 @@ public class YatraAutomationScript {
 		
 		//WebElement departureDateButton = wd.findElement(departureDateButtonLocator);
 		
-		WebDriverWait wait = new WebDriverWait(wd,Duration.ofSeconds(20));
-		
+			
 		WebElement departureDateButton=wait.until(ExpectedConditions.elementToBeClickable(departureDateButtonLocator));
 		
 		departureDateButton.click();
