@@ -33,62 +33,90 @@ public class YatraAutomationScript {
 		
 		departureDateButton.click();
 		
-		By calenderMonthLocator = By.xpath("//div[@class=\"react-datepicker__month-container\"]");
+		WebElement currMonth=selectMonthFromCalender(wd,0);
+		WebElement nextMonth =selectMonthFromCalender(wd,1);
+		Thread.sleep(2000);
+		String lowestPriceCurrMonth=getLowestPrice(currMonth);
+		String lowestPriceNextMonth=getLowestPrice(nextMonth);
+		System.out.println(lowestPriceCurrMonth+ " or  "+lowestPriceNextMonth);
+		compareTwoMonthsPrice(lowestPriceCurrMonth,lowestPriceNextMonth);    
+	
+	    wd.quit();
+	
+		
+		
+	}
+	
+	public static void compareTwoMonthsPrice(String currprice,String nextPrice)
+	{
+		// get the index of 
+		
+		int currRsindex=currprice.indexOf("Rs");
+		int nextRsindex=nextPrice.indexOf("Rs");
+		String getcurrprice=currprice.substring(currRsindex+2);
+		String getnextprice=nextPrice.substring(nextRsindex+2);
+		
+		int cp=Integer.parseInt(getcurrprice);
+		int np=Integer.parseInt(getnextprice);
+		
+		if(cp<np)
+		{
+			System.out.println("Lowest price for 2 months is "+cp);
+		}
+		else if (cp==np)
+		{
+			System.out.println("Prices are same please choose accordingly ");
+		}
+		else
+		{
+			System.out.println("Lowest price for 2 months is "+np);
+		}
+		
+	}
+	
+	public static String getLowestPrice(WebElement month)
+	{
+		By priceLocator = By.xpath(".//span[contains(@class,'custom-day-content')]");
+		
+		List<WebElement> junePriceList=month.findElements(priceLocator);
+		
+		int lowestPrice=Integer.MAX_VALUE;
+		WebElement priceElement = null;
+		for(WebElement ele:junePriceList)
+		{
+			//System.out.println(ele.getText());
+			String pricestring=ele.getText();
+			if(pricestring.length()>0) {
+			pricestring=pricestring.replace("₹", "").replace(",","");
+			int price=Integer.parseInt(pricestring);
+			
+			if(price<lowestPrice)
+			{
+				lowestPrice=price;
+				priceElement=ele;
+				
+			}
+			}
+			
+		}
+		
+		WebElement dateElement = priceElement.findElement(By.xpath(".//../.."));
+		String result =dateElement.getAttribute("aria-label")+" with price Rs"+lowestPrice;
+		return result;
+	}
+	
+	public static WebElement selectMonthFromCalender(WebDriver wd,int index)
+	{
+	By calenderMonthLocator = By.xpath("//div[@class=\"react-datepicker__month-container\"]");
 		
 		List<WebElement> calenderMonthList= wd.findElements(calenderMonthLocator);
 	
 	//List<WebElement> calenderMonthList=wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(calenderMonthLocator));
 		
-	System.out.println(calenderMonthList.size());
+   //	System.out.println(calenderMonthList.size());
 	
-	WebElement JuneMonth=calenderMonthList.get(0);
+	WebElement month=calenderMonthList.get(index);
+	return month;
 	
-	Thread.sleep(2000);
-	
-	By juneDateLocator = By.xpath(".//div[contains(@class,\"react-datepicker__day\")]");
-	By priceLocator = By.xpath(".//span[contains(@class,'custom-day-content')]");
-	
-	List<WebElement> junePriceList=JuneMonth.findElements(priceLocator);
-	
-	int lowestPrice=Integer.MAX_VALUE;
-	WebElement priceElement = null;
-	for(WebElement ele:junePriceList)
-	{
-		//System.out.println(ele.getText());
-		String pricestring=ele.getText();
-		if(pricestring.length()>0) {
-		pricestring=pricestring.replace("₹", "").replace(",","");
-		int price=Integer.parseInt(pricestring);
-		
-		if(price<lowestPrice)
-		{
-			lowestPrice=price;
-			priceElement=ele;
-			
-		}
-		}
-		
-	}
-	
-	WebElement dateElement = priceElement.findElement(By.xpath(".//../.."));
-	System.out.println("Lowest price in this month is "+lowestPrice+ " on "+dateElement.getAttribute("aria-label"));
-	
-	
-	
-	
-	wd.quit();
-	
-	
-	
-	
-	
-		
-		
-		
-	
-	
-		
-		
-		
 	}
 }
